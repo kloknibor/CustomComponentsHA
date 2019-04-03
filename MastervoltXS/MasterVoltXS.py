@@ -21,7 +21,7 @@ from homeassistant.core import CoreState
 
 _LOGGER = logging.getLogger(__name__)
 
-REQUIREMENTS = ['XSsolar==0.7']
+REQUIREMENTS = ['XSsolar==0.8']
 
 CONF_TCP_IP = 'TCP_IP'
 CONF_TCP_PORT = 'TCP_PORT'
