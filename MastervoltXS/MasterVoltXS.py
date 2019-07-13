@@ -161,20 +161,23 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
           # go get values from inverters
           data = {}
-          if (invertorCounter == 0) or (invertorCounter > 1):
-                data['dcv'] = 0
-                data['dci'] = 0
-                data['freq'] = 0
-                data['acv'] = 0
-                data['aci'] = 0
-                data['acp'] = 0
-                data['totalpower'] = 0
-                data['temp'] = 0
-                data['totalruntime'] = 0
-                if (invertorCounter > 1):
-                     _LOGGER.error("Sotware only supports 1 invertor")
+          if (invertorCounter > 1):
+              _LOGGER.error("Sotware only supports 1 invertor, only showing last one")		  
+          if (invertorCounter == 0):
+              data['dcv'] = 0
+              data['dci'] = 0
+              data['freq'] = 0
+              data['acv'] = 0
+              data['aci'] = 0
+              data['acp'] = 0
+              data['totalpower'] = 0
+              data['temp'] = 0
+              data['totalruntime'] = 0
+              data['dcp'] = 0
+              _LOGGER.info("No invertor found, maybe shutoff")
           else:
                 for i in inverters:
+                  try:
                     i.getRunningValues() # get running values for this moment
                     if (i.values['errors'] < 32768):
                       _LOGGER.error("error in inverter : %s", i.values['errors'])
@@ -187,18 +190,20 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                       data['totalpower'] = 0
                       data['temp'] = 0
                       data['totalruntime'] = 0
-                    data['dcv'] = i.values['dcv']
-                    data['dci'] = i.values['dci']
-                    data['freq'] = i.values['freq']
-                    data['acv'] = i.values['acv']
-                    data['aci'] = i.values['aci']
-                    data['acp'] = i.values['acp']
-                    data['totalpower'] = i.values['totalpower']
-                    data['temp'] = i.values['temp']
-                    data['totalruntime'] = i.values['totalruntime']
-
-
-          data['dcp'] = data['dcv'] * data['dci']
+                      data['dcp'] = 0
+                    else: 
+                      data['dcv'] = i.values['dcv']
+                      data['dci'] = i.values['dci']
+                      data['freq'] = i.values['freq']
+                      data['acv'] = i.values['acv']
+                      data['aci'] = i.values['aci']
+                      data['acp'] = i.values['acp']
+                      data['totalpower'] = i.values['totalpower']
+                      data['temp'] = i.values['temp']
+                      data['totalruntime'] = i.values['totalruntime']
+                      data['dcp'] = i.values['dcv'] * i.values['dci']
+                  except:
+                    _LOGGER.error("Data transfer incomplete, maybe inverter shutdown during data transfer" )
 
           s.close()
           update_entities(data)
